@@ -6,19 +6,18 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:54:33 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/02 23:54:34 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/06 16:47:28 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-/* L'appelant doit déjà détenir coder->mutex (sinon deadlock) */
 static bool	check_coder_burnout(t_simulation *sim, t_coder *coder,
 	int current_time)
 {
 	struct timeval	current_tv;
 
-	timestamp_to_timeval(current_time, &current_tv);
+	timestamp_to_timeval(sim, current_time, &current_tv);
 	return (timeval_diff_ms(&coder->last_compile_start, &current_tv)
 		>= sim->params.time_to_burnout);
 }
@@ -30,7 +29,6 @@ static void	set_stop(t_simulation *sim)
 	pthread_mutex_unlock(&sim->simulation_mutex);
 }
 
-/* Retourne l'index (0-based) du coder en burnout, -1 sinon ; all_done mis à jour */
 static int	scan_coders(t_simulation *sim, bool *all_done)
 {
 	int		i;
@@ -38,7 +36,7 @@ static int	scan_coders(t_simulation *sim, bool *all_done)
 	int		found;
 	t_coder	*c;
 
-	now = get_current_timestamp();
+	now = get_current_timestamp(sim);
 	found = -1;
 	*all_done = true;
 	i = 0;
@@ -56,6 +54,14 @@ static int	scan_coders(t_simulation *sim, bool *all_done)
 		i++;
 	}
 	return (found);
+}
+
+static void	end_monitor(t_simulation *sim)
+{
+	pthread_mutex_lock(&sim->monitor.mutex);
+	sim->monitor.running = false;
+	sim->monitor.simulation_ended = true;
+	pthread_mutex_unlock(&sim->monitor.mutex);
 }
 
 void	*monitor_routine(void *arg)
@@ -81,9 +87,6 @@ void	*monitor_routine(void *arg)
 		}
 		usleep(1000);
 	}
-	pthread_mutex_lock(&sim->monitor.mutex);
-	sim->monitor.running = false;
-	sim->monitor.simulation_ended = true;
-	pthread_mutex_unlock(&sim->monitor.mutex);
+	end_monitor(sim);
 	return (NULL);
 }

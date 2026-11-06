@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:55:35 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/02 23:55:36 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/06 14:08:34 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ bool	is_stopped(t_simulation *sim)
 	return (stopped);
 }
 
-/* Après l'arrêt, seul "burned out" est encore affiché */
 void	log_event(t_simulation *sim, const char *event, int coder_id)
 {
 	char	buffer[256];
@@ -36,7 +35,7 @@ void	log_event(t_simulation *sim, const char *event, int coder_id)
 		return ;
 	}
 	len = snprintf(buffer, sizeof(buffer), "%d %d %s\n",
-			get_current_timestamp(), coder_id, event);
+			get_current_timestamp(sim), coder_id, event);
 	write(1, buffer, len);
 	pthread_mutex_unlock(&sim->log_mutex);
 }
@@ -69,14 +68,13 @@ void	cleanup_simulation(t_simulation *sim)
 	pthread_mutex_destroy(&sim->simulation_mutex);
 }
 
-/* Un dongle est utilisable s'il est libre ET si son cooldown est écoulé */
 bool	is_dongle_available(t_simulation *sim, int dongle_id, int current_time)
 {
 	struct timeval	current_tv;
 	t_dongle		*dongle;
 	bool			ok;
 
-	timestamp_to_timeval(current_time, &current_tv);
+	timestamp_to_timeval(sim, current_time, &current_tv);
 	dongle = &sim->dongles[dongle_id];
 	pthread_mutex_lock(&dongle->mutex);
 	ok = dongle->available && timeval_diff_ms(&dongle->release_time,

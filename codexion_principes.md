@@ -19,7 +19,7 @@ prendre 2 dongles -> compiler -> rendre les dongles -> debugger -> refactorer ->
 
 ```bash
 ./codexion <coders> <burnout> <compile> <debug> <refactor> <nb_compiles> <cooldown> <scheduler>
-./codexion   6        1000      200       100     150        5            50         fifo
+./codexion   6        1000      200       100     150          5            50         fifo
 ```
 
 Tous les temps sont en **millisecondes**. Tous les nombres doivent être positifs (sauf `cooldown`, qui peut valoir 0).

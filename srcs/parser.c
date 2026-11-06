@@ -6,13 +6,11 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:54:39 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/02 23:55:03 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/06 17:57:19 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-#include <unistd.h>
-#include <string.h>
 
 int	is_valid_number(const char *str)
 {
@@ -27,108 +25,63 @@ int	is_valid_number(const char *str)
 	return (1);
 }
 
+static int	print_error(const char *name, const char *msg)
+{
+	write(2, "Error: ", 7);
+	write(2, name, strlen(name));
+	write(2, msg, strlen(msg));
+	return (1);
+}
+
+static int	parse_field(const char *arg, const char *name, int *dst, int min)
+{
+	long	value;
+	int		i;
+
+	if (!is_valid_number(arg))
+		return (print_error(name, " must be a valid integer\n"));
+	value = 0;
+	i = 0;
+	while (arg[i] && value <= INT_MAX)
+	{
+		value = value * 10 + (arg[i] - '0');
+		i++;
+	}
+	if (value > INT_MAX)
+		return (print_error(name, " is too large\n"));
+	if (value < min)
+		return (print_error(name, " must be positive\n"));
+	*dst = (int)value;
+	return (0);
+}
+
+static int	parse_numbers(t_params *p, char **av)
+{
+	if (parse_field(av[0], "number_of_coders", &p->num_coders, 1))
+		return (1);
+	if (parse_field(av[1], "time_to_burnout", &p->time_to_burnout, 1))
+		return (1);
+	if (parse_field(av[2], "time_to_compile", &p->time_to_compile, 1))
+		return (1);
+	if (parse_field(av[3], "time_to_debug", &p->time_to_debug, 1))
+		return (1);
+	if (parse_field(av[4], "time_to_refactor", &p->time_to_refactor, 1))
+		return (1);
+	if (parse_field(av[5], "number_of_compiles_required",
+			&p->num_compiles_required, 1))
+		return (1);
+	if (parse_field(av[6], "dongle_cooldown", &p->dongle_cooldown, 1))
+		return (1);
+	return (0);
+}
+
 int	parsing_input(t_simulation *sim, t_params *params, char **av)
 {
-	// Parse number of coders
-	if (!is_valid_number(av[0]))
-	{
-		write(2, "Error: Invalid number of coders\n", 31);
+	if (parse_numbers(params, av))
 		return (1);
-	}
-	params->num_coders = atoi(av[0]);
-	if (params->num_coders <= 0)
-	{
-		write(2, "Error: Number of coders must be positive\n", 41);
-		return (1);
-	}
-
-	// Parse time to burnout
-	if (!is_valid_number(av[1]))
-	{
-		write(2, "Error: Invalid time to burnout\n", 31);
-		return (1);
-	}
-	params->time_to_burnout = atoi(av[1]);
-	if (params->time_to_burnout <= 0)
-	{
-		write(2, "Error: Time to burnout must be positive\n", 40);
-		return (1);
-	}
-
-	// Parse time to compile
-	if (!is_valid_number(av[2]))
-	{
-		write(2, "Error: Invalid time to compile\n", 30);
-		return (1);
-	}
-	params->time_to_compile = atoi(av[2]);
-	if (params->time_to_compile <= 0)
-	{
-		write(2, "Error: Time to compile must be positive\n", 39);
-		return (1);
-	}
-
-	// Parse time to debug
-	if (!is_valid_number(av[3]))
-	{
-		write(2, "Error: Invalid time to debug\n", 29);
-		return (1);
-	}
-	params->time_to_debug = atoi(av[3]);
-	if (params->time_to_debug <= 0)
-	{
-		write(2, "Error: Time to debug must be positive\n", 38);
-		return (1);
-	}
-
-	// Parse time to refactor
-	if (!is_valid_number(av[4]))
-	{
-		write(2, "Error: Invalid time to refactor\n", 31);
-		return (1);
-	}
-	params->time_to_refactor = atoi(av[4]);
-	if (params->time_to_refactor <= 0)
-	{
-		write(2, "Error: Time to refactor must be positive\n", 40);
-		return (1);
-	}
-
-	// Parse number of compiles required
-	if (!is_valid_number(av[5]))
-	{
-		write(2, "Error: Invalid number of compiles required\n", 43);
-		return (1);
-	}
-	params->num_compiles_required = atoi(av[5]);
-	if (params->num_compiles_required <= 0)
-	{
-		write(2, "Error: Number of compiles required must be positive\n", 51);
-		return (1);
-	}
-
-	// Parse dongle cooldown
-	if (!is_valid_number(av[6]))
-	{
-		write(2, "Error: Invalid dongle cooldown\n", 30);
-		return (1);
-	}
-	params->dongle_cooldown = atoi(av[6]);
-	if (params->dongle_cooldown < 0)
-	{
-		write(2, "Error: Dongle cooldown cannot be negative\n", 41);
-		return (1);
-	}
-
-	// Parse scheduler
 	params->scheduler = av[7];
-	if (strcmp(params->scheduler, "fifo") != 0 && strcmp(params->scheduler, "edf") != 0)
-	{
-		write(2, "Error: Scheduler must be 'fifo' or 'edf'\n", 41);
-		return (1);
-	}
-
-	// Initialize simulation parameters
+	if (strcmp(av[7], "fifo") != 0 && strcmp(av[7], "edf") != 0)
+		return (print_error("scheduler", " must be fifo or edf\n"));
 	sim->params = *params;
 	sim->should_stop = false;
 	return (0);

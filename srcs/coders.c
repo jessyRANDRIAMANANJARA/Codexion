@@ -6,25 +6,12 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:53:52 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/02 23:59:38 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/06 17:00:37 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "codexion.h"
 
-void	update_burnout_deadline(t_coder *coder)
-{
-	struct timeval	current_time;
-
-	gettimeofday(&current_time, NULL);
-	coder->burnout_deadline.tv_sec = current_time.tv_sec
-		+ (coder->params.time_to_burnout / 1000);
-	coder->burnout_deadline.tv_usec = current_time.tv_usec
-		+ (coder->params.time_to_burnout % 1000) * 1000;
-}
-
-/* Attente par tranches de 1 ms pour pouvoir s'arrêter vite */
 static void	ms_sleep(t_simulation *sim, int ms)
 {
 	int	elapsed;
@@ -76,9 +63,8 @@ void	*coder_routine(void *arg)
 	t_simulation	*sim;
 	t_coder			*coder;
 
-	sim = &g_simulation;
-	coder = &sim->coders[*(int *)arg];
-	free(arg);
+	coder = (t_coder *)arg;
+	sim = coder->sim;
 	pthread_mutex_lock(&coder->mutex);
 	coder->running = true;
 	pthread_mutex_unlock(&coder->mutex);

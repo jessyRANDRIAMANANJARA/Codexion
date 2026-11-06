@@ -7,10 +7,13 @@ C_FILES			= srcs/codexion.c \
 				  srcs/parser.c \
 				  srcs/time.c \
 				  srcs/coders.c \
+				  srcs/coders_burnout.c \
 				  srcs/dongles.c \
 				  srcs/simulation.c \
+				  srcs/inits.c \
 				  srcs/monitor.c \
 				  srcs/heap.c \
+				  srcs/heap_insert.c \
 				  srcs/utils.c
 
 O_FILES			= $(patsubst srcs/%.c,$(OBJ_DIR)/srcs/%.o,$(C_FILES))

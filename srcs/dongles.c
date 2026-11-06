@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:54:07 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/02 23:54:19 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/06 15:38:59 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void	release_dongle(t_simulation *sim, int dongle_id)
 	pthread_mutex_unlock(&dongle->mutex);
 }
 
-/* Prend les deux dongles de façon atomique (tout ou rien) : évite le deadlock */
 bool	acquire_dongles(t_simulation *sim, t_coder *coder)
 {
 	int	left;
@@ -43,7 +42,7 @@ bool	acquire_dongles(t_simulation *sim, t_coder *coder)
 	if (left == right)
 		return (false);
 	pthread_mutex_lock(&sim->simulation_mutex);
-	now = get_current_timestamp();
+	now = get_current_timestamp(sim);
 	if (sim->should_stop || !is_dongle_available(sim, left, now)
 		|| !is_dongle_available(sim, right, now))
 	{

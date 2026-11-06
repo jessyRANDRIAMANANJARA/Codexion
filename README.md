@@ -2,7 +2,7 @@
 
 ## Description
 
-CODEXION is a multithreaded simulation project that models coders working in a shared co-working environment, competing for limited USB dongles to compile their quantum code. The project demonstrates advanced concepts in concurrent programming, including thread synchronization, resource management, and scheduling algorithms.
+CODExION is a multithreaded simulation project that models coders working in a shared co-working environment, competing for limited USB dongles to compile their quantum code. The project demonstrates advanced concepts in concurrent programming, including thread synchronization, resource management, and scheduling algorithms.
 
 ## Goal
 
@@ -11,7 +11,7 @@ The main goal is to simulate multiple coders who must acquire USB dongles to com
 ## Instructions
 
 ### Compilation
-
+ 
 ```bash
 make
 ```
@@ -104,9 +104,9 @@ make
 ## AI Usage
 
 AI tools were used for:
+
 - **Code Structure**: Initial project layout and file organization
-- **Documentation**: README generation and technical writing assistance
+- **Documentation**: README improvement and technical writing assistance
 - **Algorithm Review**: Verification of scheduling and synchronization logic
 - **Error Handling**: Best practices for error checking and resource cleanup
-
-However, all core implementation decisions and synchronization logic were developed through manual coding and peer review to ensure deep understanding and compliance with 42 standards.
+- **Others**: functions refactoring, some tests and output analysis
