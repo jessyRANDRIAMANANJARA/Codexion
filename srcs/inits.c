@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 16:20:28 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/06 16:25:01 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/16 17:08:34 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int	init_dongles(t_simulation *sim)
 {
 	int	i;
 
-	sim->dongles = calloc(sim->params.num_coders, sizeof(t_dongle));
+	sim->dongles = malloc(sim->params.num_coders * sizeof(t_dongle));
 	if (!sim->dongles)
 		return (1);
 	i = 0;
@@ -27,8 +27,8 @@ int	init_dongles(t_simulation *sim)
 		sim->dongles[i].id = i;
 		sim->dongles[i].available = true;
 		gettimeofday(&sim->dongles[i].release_time, NULL);
-		sim->dongles[i].release_time.tv_sec
-			-= sim->params.dongle_cooldown / 1000 + 1;
+		sim->dongles[i].release_time.tv_sec = sim->start_time.tv_sec - (sim->params.dongle_cooldown / 1000 + 1);
+		sim->dongles[i].release_time.tv_usec = sim->start_time.tv_usec;
 		i++;
 	}
 	return (0);
@@ -38,7 +38,7 @@ int	init_coders(t_simulation *sim)
 {
 	int	i;
 
-	sim->coders = calloc(sim->params.num_coders, sizeof(t_coder));
+	sim->coders = malloc(sim->params.num_coders * sizeof(t_coder));
 	if (!sim->coders)
 		return (1);
 	i = 0;
@@ -50,7 +50,8 @@ int	init_coders(t_simulation *sim)
 		sim->coders[i].sim = sim;
 		sim->coders[i].alive = true;
 		sim->coders[i].params = sim->params;
-		gettimeofday(&sim->coders[i].last_compile_start, NULL);
+		sim->coders[i].last_compile_start.tv_sec = sim->start_time.tv_sec;
+		sim->coders[i].last_compile_start.tv_usec = sim->start_time.tv_usec;
 		update_burnout_deadline(&sim->coders[i]);
 		i++;
 	}

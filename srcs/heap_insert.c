@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:40:26 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/06 16:04:50 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/16 17:11:21 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,30 +23,6 @@ static t_pq_node	*create_pq_node(int priority, int coder_id)
 	node->coder_id = coder_id;
 	node->next = NULL;
 	return (node);
-}
-
-static void	insert_sorted(t_priority_queue *pq, t_pq_node *node)
-{
-	t_pq_node	*current;
-	t_pq_node	*prev;
-
-	prev = NULL;
-	current = pq->head;
-	while (current && current->priority <= node->priority)
-	{
-		prev = current;
-		current = current->next;
-	}
-	if (!prev)
-	{
-		node->next = pq->head;
-		pq->head = node;
-	}
-	else
-	{
-		prev->next = node;
-		node->next = current;
-	}
 }
 
 void	*heap_insert(t_priority_queue *pq, t_simulation *sim,
@@ -72,7 +48,24 @@ void	*heap_insert(t_priority_queue *pq, t_simulation *sim,
 		current->next = new_node;
 	}
 	else
-		insert_sorted(pq, new_node);
+	{
+		current = pq->head;
+		if (priority < current->priority || 
+			(priority == current->priority && coder_id < current->coder_id))
+		{
+			new_node->next = current;
+			pq->head = new_node;
+		}
+		else
+		{
+			while (current->next && 
+				   (current->next->priority < priority || 
+					(current->next->priority == priority && current->next->coder_id < coder_id)))
+				current = current->next;
+			new_node->next = current->next;
+			current->next = new_node;
+		}
+	}
 	pthread_mutex_unlock(&pq->mutex);
 	return (new_node);
 }

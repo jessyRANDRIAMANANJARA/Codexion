@@ -100,6 +100,7 @@ make
 - [Deadlock Prevention Techniques](https://en.wikipedia.org/wiki/Deadlock)
 - [Priority Queue Implementation](https://en.wikipedia.org/wiki/Priority_queue)
 - [EDF Scheduling Algorithm](https://en.wikipedia.org/wiki/Earliest_deadline_first_scheduling)
+- [Threads and mutex](https://www.codequoi.com/en/threads-mutexes-and-concurrent-programming-in-c/)
 
 ## AI Usage
 

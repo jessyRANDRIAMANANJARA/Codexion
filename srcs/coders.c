@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:53:52 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/06 17:00:37 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/16 19:00:33 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,7 @@ static void	ms_sleep(t_simulation *sim, int ms)
 
 static bool	try_acquire_dongles(t_simulation *sim, t_coder *coder)
 {
-	while (!is_stopped(sim))
-	{
-		if (acquire_dongles(sim, coder))
-			return (true);
-		usleep(500);
-	}
-	return (false);
+	return try_acquire_dongles_with_scheduler(sim, coder);
 }
 
 static void	perform_compilation(t_simulation *sim, t_coder *coder)
@@ -58,6 +52,23 @@ static bool	compiles_done(t_simulation *sim, t_coder *coder)
 	return (done);
 }
 
+static void	perform_debugging(t_simulation *sim, t_coder *coder)
+{
+	while (!is_stopped(sim))
+	{
+		if (!try_acquire_dongles(sim, coder))
+			break ;
+		perform_compilation(sim, coder);
+		release_dongles(sim, coder);
+		log_event(sim, "is debugging", coder->id);
+		ms_sleep(sim, sim->params.time_to_debug);
+		log_event(sim, "is refactoring", coder->id);
+		ms_sleep(sim, sim->params.time_to_refactor);
+		if (compiles_done(sim, coder))
+			break ;
+	}
+}
+
 void	*coder_routine(void *arg)
 {
 	t_simulation	*sim;
@@ -68,19 +79,15 @@ void	*coder_routine(void *arg)
 	pthread_mutex_lock(&coder->mutex);
 	coder->running = true;
 	pthread_mutex_unlock(&coder->mutex);
-	while (!is_stopped(sim))
+	if (sim->params.num_coders == 1)
 	{
-		if (!try_acquire_dongles(sim, coder))
-			break ;
-		perform_compilation(sim, coder);
-		release_dongles(sim, coder);
-		if (compiles_done(sim, coder))
-			break ;
-		log_event(sim, "is debugging", coder->id);
-		ms_sleep(sim, sim->params.time_to_debug);
-		log_event(sim, "is refactoring", coder->id);
-		ms_sleep(sim, sim->params.time_to_refactor);
+		log_event(sim, "cannot compile: only one dongle available", coder->id);
+		pthread_mutex_lock(&coder->mutex);
+		coder->running = false;
+		pthread_mutex_unlock(&coder->mutex);
+		return (NULL);
 	}
+	perform_debugging(sim, coder);
 	pthread_mutex_lock(&coder->mutex);
 	coder->running = false;
 	pthread_mutex_unlock(&coder->mutex);

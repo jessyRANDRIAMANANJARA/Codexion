@@ -12,6 +12,8 @@ C_FILES			= srcs/codexion.c \
 				  srcs/simulation.c \
 				  srcs/inits.c \
 				  srcs/monitor.c \
+				  srcs/scheduler.c \
+				  srcs/acquire_helpers.c \
 				  srcs/heap.c \
 				  srcs/heap_insert.c \
 				  srcs/utils.c

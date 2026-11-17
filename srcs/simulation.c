@@ -33,6 +33,7 @@ int	init_simulation(t_simulation *sim)
 {
 	pthread_mutex_init(&sim->log_mutex, NULL);
 	pthread_mutex_init(&sim->simulation_mutex, NULL);
+	pthread_cond_init(&sim->dongles_available, NULL);
 	init_monitor(sim);
 	if (init_dongles(sim) != 0 || init_coders(sim) != 0)
 		return (1);

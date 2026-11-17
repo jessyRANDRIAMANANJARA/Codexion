@@ -6,7 +6,7 @@
 /*   By: hrandri2 <hrandri2@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/02 23:54:39 by hrandri2          #+#    #+#             */
-/*   Updated: 2026/11/06 17:57:19 by hrandri2         ###   ########.fr       */
+/*   Updated: 2026/11/16 17:12:37 by hrandri2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,11 @@ static int	parse_field(const char *arg, const char *name, int *dst, int min)
 	if (value > INT_MAX)
 		return (print_error(name, " is too large\n"));
 	if (value < min)
+	{
+		if (min == 0)
+			return (print_error(name, " must be positive or zero\n"));
 		return (print_error(name, " must be positive\n"));
+	}
 	*dst = (int)value;
 	return (0);
 }
@@ -70,7 +74,7 @@ static int	parse_numbers(t_params *p, char **av)
 	if (parse_field(av[5], "number_of_compiles_required",
 			&p->num_compiles_required, 1))
 		return (1);
-	if (parse_field(av[6], "dongle_cooldown", &p->dongle_cooldown, 1))
+	if (parse_field(av[6], "dongle_cooldown", &p->dongle_cooldown, 0))
 		return (1);
 	return (0);
 }

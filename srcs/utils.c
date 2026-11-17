@@ -66,19 +66,30 @@ void	cleanup_simulation(t_simulation *sim)
 	pthread_cond_destroy(&sim->monitor.cond);
 	pthread_mutex_destroy(&sim->log_mutex);
 	pthread_mutex_destroy(&sim->simulation_mutex);
+	pthread_cond_destroy(&sim->dongles_available);
 }
 
 bool	is_dongle_available(t_simulation *sim, int dongle_id, int current_time)
 {
-	struct timeval	current_tv;
-	t_dongle		*dongle;
-	bool			ok;
+	t_dongle	*dongle;
+	int			release_timestamp;
+	int			time_since_release;
 
-	timestamp_to_timeval(sim, current_time, &current_tv);
 	dongle = &sim->dongles[dongle_id];
 	pthread_mutex_lock(&dongle->mutex);
-	ok = dongle->available && timeval_diff_ms(&dongle->release_time,
-			&current_tv) >= sim->params.dongle_cooldown;
+	
+	if (!dongle->available)
+	{
+		pthread_mutex_unlock(&dongle->mutex);
+		return (false);
+	}
+	
+	// Convert release_time to timestamp
+	release_timestamp = (dongle->release_time.tv_sec - sim->start_time.tv_sec) * 1000 +
+					   (dongle->release_time.tv_usec - sim->start_time.tv_usec) / 1000;
+	
+	time_since_release = current_time - release_timestamp;
+	
 	pthread_mutex_unlock(&dongle->mutex);
-	return (ok);
+	return (time_since_release >= sim->params.dongle_cooldown);
 }
